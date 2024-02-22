@@ -1,0 +1,40 @@
+---
+title: "Untitled"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r}
+if(!require(dplyr)) {install.packages("dplyr"); library(dplyr)}
+if(!require(tidyverse)) {install.packages("tidyverse"); library(tidyverse)}
+if(!require(wdman)) {install.packages("wdman"); library(wdman)}
+if(!require(netstat)) {install.packages("netstat"); library(netstat)}
+if(!require(xml2)) {install.packages("xml2"); library(xml2)}
+if(!require(purrr)) {install.packages("purrr"); library(purrr)}
+if(!require(readr)) {install.packages("readr"); library(readr)}
+if (!require(usethis)) {install.packages("usethis"); library(usethis)}
+if (!require(dotenv)) {install.packages("dotenv"); library(dotenv)}
+if (!require(here)) {install.packages("here"); library(here)}
+if (!require(readxl)) {install.packages("readxl"); library(readxl)}
+if (!require(stringr)) {install.packages("stringr"); library(stringr)}
+data <- tibble()
+setwd("/Users/riley/Downloads")
+for (i in 2:6) {
+  tempdata <- read_excel(paste0("./report_bookings (", i, ").xls"))
+  data <- rbind(tempdata, data)
+}
+```
+
+```{r}
+data <- data %>%
+  mutate(matches = str_extract_all(data[[17]], "730\\d*")) %>%
+  filter(lengths(matches) > 0)
+
+PIDs <- data %>% 
+  mutate(PIDs = str_extract_all(data[[17]], "730\\d*")) %>% 
+  select(PIDs) %>% 
+  unnest_longer(PIDs) %>%
+  distinct(PIDs, .keep_all = TRUE)
+
+write.csv(PIDs, "PIDs.csv", row.names = FALSE)
+```
